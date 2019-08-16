@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 
   char *err = NULL;
 
-  /* valid we have a command */
+  /* validate we have a command */
   if (argc == 1 || strcmp(argv[1], "--help") == 0) {
     fprintf(stderr, "usage: %s command args...\n"
                     " deny network access to a process\n", argv[0]);

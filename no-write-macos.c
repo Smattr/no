@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 
   char *err = NULL;
 
-  /* valid we have a command */
+  /* validate we have a command */
   if (argc == 1 || strcmp(argv[1], "--help") == 0) {
     fprintf(stderr, "usage: %s command args...\n"
                     " prevent a process from writing to the file system\n", argv[0]);
