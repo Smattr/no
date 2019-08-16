@@ -14,8 +14,10 @@ endif ()
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
   add_executable(no-network no-network-macos.c)
+  add_executable(no-write   no-write-macos.c)
 else()
   message(FATAL_ERROR sandboxing not implemented for this platform)
 endif()
 
 install(TARGETS no-network RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS no-write   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
