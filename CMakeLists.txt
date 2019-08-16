@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
-project(box C)
+project(no C)
 
-# this seems to be some magic to get libraries to install correctlyd
+# this seems to be some magic to get libraries to install correctly
 include(GNUInstallDirs)
 
 add_compile_options(-std=c99 -ansi -pedantic -Wall -Wextra -Wwrite-strings -Wmissing-declarations -Wshadow)
@@ -13,10 +13,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif ()
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
-  set(DEPRIVILEGE_C deprivilege-macos.c)
+  add_executable(no-network no-network-macos.c)
 else()
   message(FATAL_ERROR sandboxing not implemented for this platform)
 endif()
 
-add_executable(box main.c ${DEPRIVILEGE_C})
-install(TARGETS box RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS no-network RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
