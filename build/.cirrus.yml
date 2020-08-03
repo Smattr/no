@@ -1,0 +1,13 @@
+task:
+
+  # only test the master branch and pull requests
+  only_if: $CIRRUS_BRANCH == "master" || $CIRRUS_PR != ""
+
+  install_script: pkg upgrade -y && pkg install -y cmake
+
+  test_script: uname -sr && mkdir build && cd build && cmake .. && cmake --build . && sudo cmake --build . -- install
+
+  matrix:
+    - name: FreeBSD 13.0
+      freebsd_instance:
+        image_family: freebsd-13-0-snap
