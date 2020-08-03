@@ -4,7 +4,11 @@ add_library(libno
   include/no/no.h)
 
 # TODO: add implementations for other platforms
-target_sources(libno PRIVATE src/stub/exec.c)
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+  target_sources(libno PRIVATE src/macos/exec.c)
+else()
+  target_sources(libno PRIVATE src/stub/exec.c)
+endif()
 
 target_include_directories(libno
   PUBLIC
