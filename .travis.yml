@@ -21,4 +21,4 @@ matrix:
       - CFLAGS="-fsanitize=address -Werror"
 
 script:
-  - uname -sr && mkdir build && cd build && cmake .. && cmake --build . && sudo env "PATH=$PATH" cmake --build . -- install
+  - uname -sr && mkdir build && cd build && cmake .. && cmake --build . && cmake --build . --target test && sudo env "PATH=$PATH" cmake --build . -- install
