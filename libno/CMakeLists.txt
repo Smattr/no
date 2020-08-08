@@ -6,6 +6,8 @@ add_library(libno
 # TODO: add implementations for other platforms
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
   target_sources(libno PRIVATE src/macos/exec.c)
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+  target_sources(libno PRIVATE src/linux/exec.c)
 else()
   target_sources(libno PRIVATE src/stub/exec.c)
 endif()
