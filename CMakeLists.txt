@@ -14,3 +14,6 @@ endif()
 
 add_subdirectory(libno)
 add_subdirectory(no)
+
+enable_testing()
+add_test(integration env PATH=${CMAKE_CURRENT_BINARY_DIR}/no:$ENV{PATH} python3 ${CMAKE_CURRENT_SOURCE_DIR}/test/test.py)
