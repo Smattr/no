@@ -1,7 +1,9 @@
 project(libno LANGUAGES C)
 
 add_library(libno
-  include/no/no.h)
+  include/no/no.h
+  src/plat-run.h
+  src/run.c)
 
 # TODO: add implementations for other platforms
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")

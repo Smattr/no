@@ -1,21 +1,20 @@
+#include <assert.h>
 #include <errno.h>
 #include <linux/audit.h>
 #include <linux/filter.h>
 #include <linux/seccomp.h>
-#include <no/no.h>
+#include "../plat-run.h"
 #include <stddef.h>
 #include <sys/prctl.h>
 #include <sys/socket.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 
-int no_run(const char **argv, const no_config_t *config) {
+int plat_run(const char **argv, const no_config_t *config) {
 
-  if (argv == NULL)
-    return EINVAL;
-
-  if (config == NULL)
-    return EINVAL;
+  assert(argv != NULL);
+  assert(argv[0] != NULL);
+  assert(config != NULL);
 
   if (!config->network) {
 

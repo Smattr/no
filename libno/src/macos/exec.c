@@ -1,16 +1,15 @@
+#include <assert.h>
 #include <errno.h>
-#include <no/no.h>
+#include "../plat-run.h"
 #include <sandbox.h>
 #include <stddef.h>
 #include <unistd.h>
 
-int no_run(const char **argv, const no_config_t *config) {
+int plat_run(const char **argv, const no_config_t *config) {
 
-  if (argv == NULL)
-    return EINVAL;
-
-  if (config == NULL)
-    return EINVAL;
+  assert(argv != NULL);
+  assert(argv[0] != NULL);
+  assert(config != NULL);
 
   // can we use the built-in "no network" profile?
   if (!config->network) {
