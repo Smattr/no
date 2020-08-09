@@ -11,6 +11,10 @@ int plat_run(const char **argv, const no_config_t *config) {
   assert(argv[0] != NULL);
   assert(config != NULL);
 
+  // TODO: implement other restrictions
+  if (!config->home_read || !config->home_write || !config->temp_write || !config->rest_write)
+    return ENOTSUP;
+
   // can we use the built-in "no network" profile?
   if (!config->network) {
     char *err;

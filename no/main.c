@@ -5,7 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-static no_config_t conf;
+static no_config_t conf = {
+  .home_read = true,
+  .home_write = true,
+  .temp_write = true,
+  .rest_write = true,
+};
 
 static char **args;
 
