@@ -5,6 +5,7 @@ project(no C)
 include(GNUInstallDirs)
 
 add_compile_options(-std=c99 -pedantic -Wall -Wextra -Wwrite-strings -Wmissing-declarations -Wshadow)
+add_definitions (-D_DEFAULT_SOURCE -D_BSD_SOURCE -D_GNU_SOURCE)
 
 # enable --as-needed, present on GNU ld on Linux, to minimise dependencies
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

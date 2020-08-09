@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #ifdef __APPLE__
@@ -25,7 +26,7 @@ static char **get_environ(void) {
 #endif
 }
 
-void help() {
+static void help() {
 
   // man page data that is generated
   extern unsigned char no_1[];
