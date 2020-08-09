@@ -1,9 +1,100 @@
 #include <getopt.h>
 #include <no/no.h>
+#include <spawn.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+
+#ifdef __APPLE__
+    #include <crt_externs.h>
+#endif
+
+static char **get_environ(void) {
+#ifdef __APPLE__
+  // on macOS, environ is not directly accessible
+  return *_NSGetEnviron();
+#else
+  /* some platforms fail to expose environ in a header (e.g. FreeBSD), so
+   * declare it ourselves and assume it will be available when linking
+   */
+  extern char **environ;
+
+  return environ;
+#endif
+}
+
+void help() {
+
+  // man page data that is generated
+  extern unsigned char no_1[];
+  extern unsigned int no_1_len;
+
+  // find $TMPDIR
+  const char *TMPDIR = getenv("TMPDIR");
+  if (TMPDIR == NULL)
+    TMPDIR = "/tmp";
+
+  // create a temporary file
+  char *path = NULL;
+  if (asprintf(&path, "%s/temp.XXXXXX", TMPDIR) < 0) {
+    perror("asprintf");
+    exit(EXIT_FAILURE);
+  }
+  int fd = mkstemp(path);
+  if (fd < 0) {
+    perror("mkstemp");
+    free(path);
+    exit(EXIT_FAILURE);
+  }
+
+  // write the manpage to the temporary file
+  {
+    ssize_t r = write(fd, no_1, no_1_len);
+    close(fd);
+    if (r < 0 || (size_t)r != no_1_len) {
+      perror("write");
+      (void)unlink(path);
+      free(path);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  // run man to display the help text
+  const char *argv[] = { "man",
+#ifdef __linux__
+    "--local-file",
+#endif
+    path, NULL };
+  int ret = EXIT_FAILURE;
+  do {
+
+    pid_t pid;
+    int r = posix_spawnp(&pid, argv[0], NULL, NULL, (char*const*)argv,
+      get_environ());
+    if (r != 0) {
+      fprintf(stderr, "posix_spawnp: %s\n", strerror(r));
+      break;
+    }
+
+    int status;
+    if (waitpid(pid, &status, 0) < 0) {
+      perror("waitpid");
+      break;
+    }
+
+    if (WIFEXITED(status))
+      ret = WEXITSTATUS(status);
+
+  } while (0);
+
+  // clean up
+  (void)unlink(path);
+  free(path);
+
+  exit(ret);
+}
 
 static no_config_t conf = {
   .home_read = true,
@@ -21,6 +112,7 @@ static void parse_args(int argc, char **argv) {
     static const struct option opts[] = {
       { "allow-network", no_argument, 0, 128 },
       { "disallow-network", no_argument, 0, 129 },
+      { "help", no_argument, 0, 'h' },
       { 0, 0, 0, 0 },
     };
 
@@ -34,6 +126,10 @@ static void parse_args(int argc, char **argv) {
 
       case '?': // illegal option
         exit(EXIT_FAILURE);
+
+      case 'h': // --help
+        help();
+        __builtin_unreachable();
 
       case 128: // --allow-network
         conf.network = true;
