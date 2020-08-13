@@ -52,14 +52,20 @@ static void help() {
 
   // write the manpage to the temporary file
   {
-    ssize_t r = write(fd, no_1, no_1_len);
-    close(fd);
-    if (r < 0 || (size_t)r != no_1_len) {
-      perror("write");
-      (void)unlink(path);
-      free(path);
-      exit(EXIT_FAILURE);
+    size_t len = no_1_len;
+    for (const unsigned char *p = no_1; len > 0; ) {
+      ssize_t r = write(fd, p, len);
+      if (r < 0) {
+        close(fd);
+        perror("write");
+        (void)unlink(path);
+        free(path);
+        exit(EXIT_FAILURE);
+      }
+      p += (size_t)r;
+      len -= (size_t)r;
     }
+    close(fd);
   }
 
   // run man to display the help text
