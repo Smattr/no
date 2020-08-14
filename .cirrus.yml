@@ -3,7 +3,7 @@ task:
   # only test the master branch and pull requests
   only_if: $CIRRUS_BRANCH == "master" || $CIRRUS_PR != ""
 
-  install_script: pkg install -y cmake
+  install_script: pkg install -y cmake vim
 
   test_script: uname -sr && mkdir build && cd build && cmake .. && cmake --build . && sudo cmake --build . -- install
 
