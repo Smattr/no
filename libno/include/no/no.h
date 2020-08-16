@@ -2,6 +2,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+  extern "C" {
+#endif
+
 /// configuration for sandboxing
 typedef struct {
 
@@ -29,3 +33,7 @@ typedef struct {
  * \return An errno on failure
  */
 int no_run(const char **argv, const no_config_t *config);
+
+#ifdef __cplusplus
+}
+#endif
