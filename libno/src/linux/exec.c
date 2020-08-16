@@ -17,7 +17,7 @@ int plat_run(const char **argv, const no_config_t *config) {
   assert(config != NULL);
 
   // TODO: implement other restrictions
-  if (!config->home_read || !config->home_write || !config->temp_write || !config->rest_write)
+  if (!config->home || config->file_system != NO_RESTRICTIONS)
     return ENOTSUP;
 
   if (!config->network) {

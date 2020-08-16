@@ -6,23 +6,31 @@
   extern "C" {
 #endif
 
+/// access permissions for file system operations
+typedef enum {
+
+  /// read-only
+  NO_WRITES,
+
+  /// read-only, except allow writes to $TMPDIR
+  NO_WRITES_EXCEPT_TMP,
+
+  /// full read/write
+  NO_RESTRICTIONS,
+
+} no_access_t;
+
 /// configuration for sandboxing
 typedef struct {
 
   /// allow network access?
   bool network;
 
-  /// allow reading from $HOME?
-  bool home_read;
+  /// allow access to $HOME?
+  bool home;
 
-  /// allow writing to $HOME?
-  bool home_write;
-
-  /// allow writing to $TMPDIR?
-  bool temp_write;
-
-  /// allow writing to the rest of the file system?
-  bool rest_write;
+  /// file system access permissions
+  no_access_t file_system;
 
 } no_config_t;
 

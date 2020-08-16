@@ -104,10 +104,8 @@ static void help() {
 }
 
 static no_config_t conf = {
-  .home_read = true,
-  .home_write = true,
-  .temp_write = true,
-  .rest_write = true,
+  .home = true,
+  .file_system = NO_RESTRICTIONS,
 };
 
 static char **args;
