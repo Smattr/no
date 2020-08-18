@@ -105,7 +105,7 @@ static void help() {
 
 static no_config_t conf = {
   .home = true,
-  .file_system = NO_RESTRICTIONS,
+  .file_system = NO_WRITES,
 };
 
 static char **args;
@@ -116,7 +116,10 @@ static void parse_args(int argc, char **argv) {
 
     static const struct option opts[] = {
       { "allow-network", no_argument, 0, 128 },
-      { "disallow-network", no_argument, 0, 129 },
+      { "allow-tmp-writes", no_argument, 0, 129 },
+      { "allow-writes", no_argument, 0, 130 },
+      { "disallow-network", no_argument, 0, 131 },
+      { "disallow-writes", no_argument, 0, 132 },
       { "help", no_argument, 0, 'h' },
       { 0, 0, 0, 0 },
     };
@@ -140,8 +143,21 @@ static void parse_args(int argc, char **argv) {
         conf.network = true;
         break;
 
-      case 129: // --disallow-network
+      case 129: // --allow-tmp-writes
+        if (conf.file_system == NO_WRITES)
+          conf.file_system = NO_WRITES_EXCEPT_TMP;
+        break;
+
+      case 130: // --allow-writes
+        conf.file_system = NO_RESTRICTIONS;
+        break;
+
+      case 131: // --disallow-network
         conf.network = false;
+        break;
+
+      case 132: // --disallow-writes
+        conf.file_system = NO_WRITES;
         break;
 
     }

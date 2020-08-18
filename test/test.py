@@ -18,9 +18,8 @@ class Test(unittest.TestCase):
       self.skipTest('cannot ping example.com')
 
     # now confirm we can ping it when allowing network traffic
-    subprocess.check_call(
-      ['no', '--allow-network', '--', 'ping', '-c', '1', 'example.com'],
-      stdout=subprocess.DEVNULL)
+    subprocess.check_call(['no', '--allow-network', '--allow-writes', '--',
+      'ping', '-c', '1', 'example.com'], stdout=subprocess.DEVNULL)
 
   def test_disallow_network(self):
     '''
@@ -36,8 +35,8 @@ class Test(unittest.TestCase):
 
     # now confirm we cannot ping it when disallowing network traffic
     try:
-      subprocess.check_call(['no', '--', 'ping', '-c', '1', 'example.com'],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+      subprocess.check_call(['no', '--allow-writes', '--', 'ping', '-c', '1',
+        'example.com'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
       self.fail('ping succeeded with network access denied')
     except subprocess.CalledProcessError:
       pass

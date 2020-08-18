@@ -14,6 +14,23 @@ sufficient to prevent buggy or simple unwanted behaviour.
 Enable or disable use of networking by the command. The default is to disallow
 networking.
 .RE
+.PP
+\fB--allow-tmp-writes\fR
+.RS
+Allow file system writes to \fB$TMPDIR\fR. If no other file system options are
+given, this will result in all paths outside of \fB$TMPDIR\fR being read-only.
+A subsequent \fB--disallow-writes\fR option will override this and make
+\fB$TMPDIR\fR read-only.
+.RE
+.PP
+\fB--[allow|disallow]-writes\fR
+.RS
+Enable or disable write access to the file system. The default is to disallow
+access. This will override any prior \fB--allow-tmp-writes\fR option, but a
+subsequent \fB--allow-tmp-writes\fR will override this specifically for
+\fB$TMPDIR\fR.
+.RE
+.PP
 .SH AUTHOR
 All comments, questions and complaints should be directed to Matthew Fernandez
 <matthew.fernandez@gmail.com>.
