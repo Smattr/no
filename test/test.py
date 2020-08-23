@@ -12,16 +12,16 @@ class Test(unittest.TestCase):
     test --allow-network
     '''
 
-    # first check if we can ping example.com when uninstrumented
+    # first check if we can lookup example.com when uninstrumented
     try:
-      subprocess.check_call(['ping', '-c', '1', 'example.com'],
+      subprocess.check_call(['nslookup', 'example.com'],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-      self.skipTest('cannot ping example.com')
+      self.skipTest('cannot lookup example.com')
 
-    # now confirm we can ping it when allowing network traffic
+    # now confirm we can lookup it when allowing network traffic
     subprocess.check_call(['no', '--allow-network', '--allow-writes', '--',
-      'ping', '-c', '1', 'example.com'], stdout=subprocess.DEVNULL)
+      'nslookup', 'example.com'], stdout=subprocess.DEVNULL)
 
   def test_allow_writes(self):
     '''
@@ -63,15 +63,15 @@ class Test(unittest.TestCase):
     test disallowing network access (the default)
     '''
 
-    # first check if we can ping example.com when uninstrumented
+    # first check if we can lookup example.com when uninstrumented
     try:
-      subprocess.check_call(['ping', '-c', '1', 'example.com'],
+      subprocess.check_call(['nslookup', 'example.com'],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
-      self.skipTest('cannot ping example.com')
+      self.skipTest('cannot lookup example.com')
 
-    # now confirm we cannot ping it when disallowing network traffic
-    p = subprocess.run(['no', '--allow-writes', '--', 'ping', '-c', '1',
+    # now confirm we cannot lookup it when disallowing network traffic
+    p = subprocess.run(['no', '--allow-writes', '--', 'nslookup',
       'example.com'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     self.assertNotEqual(p.returncode, 0)
 
