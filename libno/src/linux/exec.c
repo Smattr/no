@@ -75,26 +75,32 @@ int plat_run(const char **argv, const no_config_t *config) {
 
       // block open with write access
 #ifdef __NR_open
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_open, 0, 4),
+      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_open, 0, 6),
       BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[1])),
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, O_RDONLY, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
+      BPF_JUMP(BPF_JMP|BPF_JSET|BPF_K, O_WRONLY, 0, 1),
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
+      BPF_JUMP(BPF_JMP|BPF_JSET|BPF_K, O_RDWR, 0, 1),
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
 #endif
       // block openat with write access
 #ifdef __NR_openat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_openat, 0, 4),
-      BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[2])),
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, O_RDONLY, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
+      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_openat, 0, 6),
+      BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[1])),
+      BPF_JUMP(BPF_JMP|BPF_JSET|BPF_K, O_WRONLY, 0, 1),
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
+      BPF_JUMP(BPF_JMP|BPF_JSET|BPF_K, O_RDWR, 0, 1),
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
 #endif
 #ifdef __NR_open_by_handle_at
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_open_by_handle_at, 0, 4),
-      BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[2])),
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, O_RDONLY, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
+      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_open_by_handle_at, 0, 6),
+      BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[1])),
+      BPF_JUMP(BPF_JMP|BPF_JSET|BPF_K, O_WRONLY, 0, 1),
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
+      BPF_JUMP(BPF_JMP|BPF_JSET|BPF_K, O_RDWR, 0, 1),
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
 #endif
 #ifdef __NR_chmod
       BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_chmod, 0, 1),
