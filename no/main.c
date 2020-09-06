@@ -118,8 +118,9 @@ static void parse_args(int argc, char **argv) {
       { "allow-network", no_argument, 0, 128 },
       { "allow-tmp-writes", no_argument, 0, 129 },
       { "allow-writes", no_argument, 0, 130 },
-      { "disallow-network", no_argument, 0, 131 },
-      { "disallow-writes", no_argument, 0, 132 },
+      { "debug", no_argument, 0, 131 },
+      { "disallow-network", no_argument, 0, 132 },
+      { "disallow-writes", no_argument, 0, 133 },
       { "help", no_argument, 0, 'h' },
       { 0, 0, 0, 0 },
     };
@@ -152,11 +153,15 @@ static void parse_args(int argc, char **argv) {
         conf.file_system = NO_RESTRICTIONS;
         break;
 
-      case 131: // --disallow-network
+      case 131: // --debug
+        conf.debug = true;
+        break;
+
+      case 132: // --disallow-network
         conf.network = false;
         break;
 
-      case 132: // --disallow-writes
+      case 133: // --disallow-writes
         conf.file_system = NO_WRITES;
         break;
 
