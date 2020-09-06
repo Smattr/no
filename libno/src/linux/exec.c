@@ -11,6 +11,11 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
+// seccomp sequence to permit the given system call
+#define ALLOW(syscall) \
+  BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, (syscall), 0, 1), \
+  BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
+
 int plat_run(const char **argv, const no_config_t *config) {
 
   assert(argv != NULL);
@@ -33,22 +38,18 @@ int plat_run(const char **argv, const no_config_t *config) {
       // load syscall number
       BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, nr)),
 
-      // block calls that can create a socket
-#ifdef __NR_socket
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_socket, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_socketcall
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_socketcall, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_socketpair
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_socketpair, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
+      // allow innocuous system calls
+      #define X(syscall) ALLOW(syscall)
+      #include "syscall-always-allowed.h"
+      #undef X
 
-      // allow anything else
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
+      // allow open() and friends
+      #define X(syscall) ALLOW(syscall)
+      #include "syscall-open.h"
+      #undef X
+
+      // deny anything else
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
     };
 
     static const struct sock_fprog prog = {
@@ -73,7 +74,17 @@ int plat_run(const char **argv, const no_config_t *config) {
       // load syscall number
       BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, nr)),
 
-      // block open with write access
+      // allow innocuous system calls
+      #define X(syscall) ALLOW(syscall)
+      #include "syscall-always-allowed.h"
+      #undef X
+
+      // allow networking system calls
+      #define X(syscall) ALLOW(syscall)
+      #include "syscall-net.h"
+      #undef X
+
+      // block open with write access, allow with read access
 #ifdef __NR_open
       BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_open, 0, 6),
       BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[1])),
@@ -83,7 +94,6 @@ int plat_run(const char **argv, const no_config_t *config) {
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
 #endif
-      // block openat with write access
 #ifdef __NR_openat
       BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_openat, 0, 6),
       BPF_STMT(BPF_LD|BPF_W|BPF_ABS, offsetof(struct seccomp_data, args[2])),
@@ -102,137 +112,9 @@ int plat_run(const char **argv, const no_config_t *config) {
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
       BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
 #endif
-#ifdef __NR_chmod
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_chmod, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_chown
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_chown, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_chroot
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_chroot, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_creat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_creat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_fchmodat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_fchmodat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_fchownat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_fchownat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_futimesat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_futimesat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_lchown
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_lchown, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_link
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_link, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_linkat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_linkat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_lremovexattr
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_lremovexattr, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_lsetxattr
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_lsetxattr, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_mkdir
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_mkdir, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_mkdirat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_mkdirat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_mknod
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_mknod, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_mknodat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_mknodat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_mount
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_mount, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_pivot_root
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_pivot_root, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_removexattr
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_removexattr, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_rename
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_rename, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_renameat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_renameat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_rmdir
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_rmdir, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_setxattr
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_setxattr, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_symlink
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_symlink, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_symlinkat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_symlinkat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_truncate
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_truncate, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_umount2
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_umount2, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_unlink
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_unlink, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_unlinkat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_unlinkat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_utime
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_utime, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_utimensat
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_utimensat, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
-#ifdef __NR_utimes
-      BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, __NR_utimes, 0, 1),
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
-#endif
 
-      // allow anything else
-      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_ALLOW),
+      // deny anything else
+      BPF_STMT(BPF_RET|BPF_K, SECCOMP_RET_TRAP),
     };
 
     static const struct sock_fprog prog = {
