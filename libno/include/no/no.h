@@ -32,6 +32,9 @@ typedef struct {
   /// file system access permissions
   no_access_t file_system;
 
+  /// debug mode (verbose denial reporting)
+  bool debug;
+
 } no_config_t;
 
 /** replace our image with the given program in a sandbox
