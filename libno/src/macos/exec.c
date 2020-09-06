@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <errno.h>
 #include "../plat-run.h"
+#include "run_with_profile.h"
 #include <sandbox.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -48,9 +49,9 @@ int plat_run(const char **argv, const no_config_t *config) {
       return ENOSYS;
     }
 
-  // TODO: implement other restrictions
+  // otherwise we need to build a custom profile for this
   } else {
-    return ENOTSUP;
+    return run_with_profile(argv, config);
   }
 
   (void)execvp(argv[0], (char*const*)argv);
