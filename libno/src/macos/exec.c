@@ -11,10 +11,6 @@ int plat_run(const char **argv, const no_config_t *config) {
   assert(argv[0] != NULL);
   assert(config != NULL);
 
-  // TODO
-  if (config->debug)
-    return ENOTSUP;
-
   // can we use the built-in “no network” profile?
   if (!config->network && config->home
       && config->file_system == NO_RESTRICTIONS) {

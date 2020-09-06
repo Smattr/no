@@ -22,10 +22,6 @@ int plat_run(const char **argv, const no_config_t *config) {
   assert(argv[0] != NULL);
   assert(config != NULL);
 
-  // TODO
-  if (config->debug)
-    return ENOTSUP;
-
   // TODO: implement other restrictions
   if (!config->home || config->file_system == NO_WRITES_EXCEPT_TMP)
     return ENOTSUP;
