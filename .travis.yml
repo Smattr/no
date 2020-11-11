@@ -14,11 +14,5 @@ matrix:
       - CFLAGS="-Werror -g -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=undefined -fuse-ld=gold"
       - UBSAN_OPTIONS=print_stacktrace=1
 
-  - name: macOS, XCode 11.3 Clang
-    os: osx
-    osx_image: xcode11.3
-    env:
-      - CFLAGS="-fsanitize=address -Werror"
-
 script:
   - uname -sr && mkdir build && cd build && cmake .. && cmake --build . && cmake --build . --target test && sudo env "PATH=$PATH" cmake --build . -- install
